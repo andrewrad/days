@@ -38,11 +38,10 @@
         android:id="@+id/startButton" />
 
     <Spinner
-        android:layout_width="match_parent"
+        android:layout_width="160dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:id="@+id/spinner"
         android:layout_below="@+id/startButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="36dp"
-        android:id="@+id/spinner" />
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

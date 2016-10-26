@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Chronometer;
@@ -22,6 +23,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnItemSelected;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -87,8 +89,19 @@ public class BlankFragment extends Fragment implements View.OnClickListener{
         return view;
     }
 
+    private void addSpinner() {
+        List<String> list = new ArrayList<String>();
+        list.add("hello");
+        list.add("muffin");
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, list);
+        dropdown.setAdapter(dataAdapter);
+    }
 
-    // TODO: Rename method, update argument and hook method into UI event
+    @OnItemSelected(R.id.spinner)
+    public void onSpinnerSelected(int index, AdapterView<?> parent) {
+        Log.e("log", "selected: " + index + ", view: " + parent.getItemAtPosition(index));
+    }
+
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
