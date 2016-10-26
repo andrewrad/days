@@ -3,13 +3,22 @@ package layout;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Chronometer;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.radicaldroids.days.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -22,17 +31,22 @@ import butterknife.ButterKnife;
  * Use the {@link BlankFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BlankFragment extends Fragment {
+public class BlankFragment extends Fragment implements View.OnClickListener{
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
     private String mParam1;
     private String mParam2;
 
+    private boolean isRunning = false;
+    private long lastStop;
+
     private OnFragmentInteractionListener mListener;
 
-    @BindView(R.id.textView3)
-    TextView clock;
+    @BindView(R.id.textView3) TextView clock;
+    @BindView(R.id.chronometer2) Chronometer chronView;
+    @BindView(R.id.startButton) Button startButton;
+    @BindView(R.id.spinner) Spinner dropdown;
 
     public BlankFragment() {
     }
@@ -65,9 +79,14 @@ public class BlankFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_blank, container, false);
         ButterKnife.bind(this, view);
-        clock.setText("hello");
+        startButton.setText("Start");
+        chronView.setBase(SystemClock.elapsedRealtime());
+        startButton.setOnClickListener(this);
+        addSpinner();
+
         return view;
     }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -91,6 +110,23 @@ public class BlankFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onClick(View v) {
+
+        if(isRunning == false) {
+            Log.e("efe", "time: " + chronView.getBase() + ", " + SystemClock.elapsedRealtime() + ", " + lastStop + " total: " + (SystemClock.elapsedRealtime() - lastStop));
+            chronView.setBase(SystemClock.elapsedRealtime() - lastStop);
+            chronView.start();
+            startButton.setText("Stop");
+            isRunning = true;
+        } else {
+            chronView.stop();
+            lastStop = SystemClock.elapsedRealtime() - chronView.getBase();
+            startButton.setText("Start");
+            isRunning = false;
+        }
     }
 
     /**
