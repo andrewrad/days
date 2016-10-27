@@ -16,6 +16,7 @@ import android.widget.Chronometer;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.radicaldroids.days.OnFragmentInteractionListener;
 import com.radicaldroids.days.R;
 
 import java.util.ArrayList;
@@ -152,8 +153,7 @@ public class BlankFragment extends Fragment implements View.OnClickListener{
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
+//    public interface OnFragmentInteractionListener {
+//
+//    }
 }

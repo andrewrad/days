@@ -1,0 +1,79 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="layout.AddTaskFragment">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Task"
+        android:textSize="24sp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="42dp"
+        android:id="@+id/title" />
+
+    <EditText
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="31dp"
+        android:id="@+id/add_new_task"
+        android:layout_below="@+id/title"
+        android:layout_centerHorizontal="true"
+        android:ems="7"
+        android:inputType="text"
+        android:maxLines="1"
+        android:focusable="true"
+        android:nextFocusDown="@+id/add_new_subtask"
+        tools:text="Programming"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Task:"
+        android:textSize="24sp"
+        android:id="@+id/text_task"
+        android:layout_alignBaseline="@+id/add_new_task"
+        android:layout_alignBottom="@+id/add_new_task"
+        android:layout_toLeftOf="@+id/add_new_task"
+        android:layout_toStartOf="@+id/add_new_task" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SubTask:"
+        android:textSize="24sp"
+        android:id="@+id/text_subtask"
+        android:layout_marginTop="36dp"
+        android:layout_below="@+id/add_new_task"
+        android:layout_toLeftOf="@+id/add_new_subtask"
+        android:layout_toStartOf="@+id/add_new_subtask" />
+
+    <EditText
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/add_new_subtask"
+        android:ems="7"
+        android:inputType="text"
+        android:maxLines="1"
+        android:focusable="true"
+        android:nextFocusDown="@+id/create_task_button"
+        tools:text="subtask"
+        android:layout_alignBaseline="@+id/text_subtask"
+        android:layout_alignBottom="@+id/text_subtask"
+        android:layout_alignLeft="@+id/add_new_task"
+        android:layout_alignStart="@+id/add_new_task" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create Task"
+        android:layout_marginTop="41dp"
+        android:id="@+id/create_task_button"
+        android:layout_below="@+id/add_new_subtask"
+        android:layout_centerHorizontal="true"
+        android:textAllCaps="false"/>
+
+</RelativeLayout>
