@@ -16,23 +16,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmList;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
 import layout.AddTaskFragment;
-import layout.BlankFragment;
+import layout.ChronFaceFragment;
 import models.SubTask;
 import models.Task;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener, FragmentManager.OnBackStackChangedListener{
 
     List taskList;
     private Realm realm;
+    private AddTaskFragment addTaskFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.replace(R.id.content_main, new BlankFragment()).commit();
+        ft.replace(R.id.content_main, new ChronFaceFragment()).addToBackStack(null).commit();
 
     }
 
@@ -110,9 +109,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.add_task) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction ft = fragmentManager.beginTransaction();
-            ft.replace(R.id.content_main, new AddTaskFragment()).commit();
+            addTaskFragment = new AddTaskFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.content_main, addTaskFragment)
+                    .addToBackStack(null)
+                    .commit();
 
         } else if (id == R.id.nav_gallery) {
 
@@ -139,37 +140,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void createTask(final String task, final String subTask) {
 
-        final Task result = realm.where(Task.class).equalTo("name", task).findFirst();
+        if(!task.equals("")) {
+            final Task result = realm.where(Task.class).equalTo("name", task).findFirst();
 
-        Log.e("result", "result: " + result.getName());
+            //if task is already in DB
+            if (result != null && result.getName().equals(task)) {
+                //if subtask is already under task
+                if (realm.where(Task.class).equalTo("subTasks.name", subTask).findFirst() != null) {
+                    Toast.makeText(this, "Already contains task and subtask", Toast.LENGTH_SHORT).show();
+                } else {
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            SubTask realmSubTask = realm.createObject(SubTask.class);
+                            realmSubTask.setName(subTask);
+                            result.getSubTasks().add(realmSubTask);
+//                            realm.close();
 
-        //if task is already in DB
-        if(result != null && result.getName().equals(task)) {
-            //if subtask is already under task
-            if(realm.where(Task.class).equalTo("subTasks.name", subTask).findFirst() != null) {
-                Log.e("error", "already contains task and subtask");
+                            getSupportFragmentManager().popBackStack();
+                            getSupportFragmentManager().beginTransaction().remove(addTaskFragment).commit();
+                        }
+                    });
+                }
             } else {
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
+                        Task realmTask = realm.createObject(Task.class);
+                        realmTask.setName(task);
+
                         SubTask realmSubTask = realm.createObject(SubTask.class);
                         realmSubTask.setName(subTask);
-                        result.getSubTasks().add(realmSubTask);
+                        realmTask.getSubTasks().add(realmSubTask);
+
+//                        realm.close();
                     }
                 });
             }
         } else {
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    Task realmTask = realm.createObject(Task.class);
-                    realmTask.setName(task);
-
-                    SubTask realmSubTask = realm.createObject(SubTask.class);
-                    realmSubTask.setName(subTask);
-                    realmTask.getSubTasks().add(realmSubTask);
-                }
-            });
+            Toast.makeText(this, "Please create a task", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        Log.e("backstack", "backstack");
     }
 }
