@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.replace(R.id.content_main, new ChronFaceFragment()).addToBackStack(null).commit();
+        ft.replace(R.id.content_main, ChronFaceFragment.newInstance("","")).addToBackStack(null).commit();
 
     }
 

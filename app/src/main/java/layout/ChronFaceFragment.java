@@ -25,13 +25,19 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnItemSelected;
+import io.realm.Realm;
+import io.realm.RealmResults;
+import models.Task;
 
 public class ChronFaceFragment extends Fragment implements View.OnClickListener{
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String TIME_KEY = "time";
 
     private String mParam1;
     private String mParam2;
+
+    private Realm realm;
 
     private boolean isRunning = false;
     private long lastStop;
@@ -64,6 +70,7 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -75,7 +82,12 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
         View view = inflater.inflate(R.layout.fragment_blank, container, false);
         ButterKnife.bind(this, view);
         startButton.setText("Start");
-        chronView.setBase(SystemClock.elapsedRealtime());
+
+        if(savedInstanceState != null) {
+            chronView.setBase(savedInstanceState.getLong(TIME_KEY));
+        } else {
+            chronView.setBase(SystemClock.elapsedRealtime());
+        }
         startButton.setOnClickListener(this);
         addSpinner();
 
@@ -83,11 +95,29 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
     }
 
     private void addSpinner() {
-        List<String> list = new ArrayList<String>();
-        list.add("hello");
-        list.add("muffin");
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, list);
+        realm = Realm.getDefaultInstance();
+        RealmResults<Task> realmArray = realm.where(Task.class).findAllSorted("name");
+
+        List<String> list = new ArrayList<>();
+        for(Task t:realmArray) {
+            if(t.getName().equals("")) {
+                deleteRealmObject(t);
+            } else {
+                list.add(t.getName());
+            }
+        }
+
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, list);
         dropdown.setAdapter(dataAdapter);
+    }
+
+    private void deleteRealmObject(final Task t) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                t.deleteFromRealm();
+            }
+        });
     }
 
     @OnItemSelected(R.id.spinner)
@@ -135,17 +165,9 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
         }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-//    public interface OnFragmentInteractionListener {
-//
-//    }
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putLong(TIME_KEY, chronView.getBase());
+        super.onSaveInstanceState(outState);
+    }
 }
