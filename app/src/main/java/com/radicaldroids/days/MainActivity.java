@@ -20,12 +20,19 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmList;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 import layout.AddTaskFragment;
 import layout.BlankFragment;
+import models.SubTask;
+import models.Task;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
 
     List taskList;
+    private Realm realm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +40,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         taskList = new ArrayList();
+
+        Realm.init(this);
+        realm = Realm.getDefaultInstance();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -127,11 +137,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void createTask(String task, String subTask) {
-        Log.e("task ", "Task: " + task);
-//        if(taskList.contains(task)) {
-//            Object subTaskList = new ArrayList<>(taskList.get(taskList.indexOf(task)));
-//        }
-//        taskList.add();
+    public void createTask(final String task, final String subTask) {
+
+        final Task result = realm.where(Task.class).equalTo("name", task).findFirst();
+
+        Log.e("result", "result: " + result.getName());
+
+        //if task is already in DB
+        if(result != null && result.getName().equals(task)) {
+            //if subtask is already under task
+            if(realm.where(Task.class).equalTo("subTasks.name", subTask).findFirst() != null) {
+                Log.e("error", "already contains task and subtask");
+            } else {
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        SubTask realmSubTask = realm.createObject(SubTask.class);
+                        realmSubTask.setName(subTask);
+                        result.getSubTasks().add(realmSubTask);
+                    }
+                });
+            }
+        } else {
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    Task realmTask = realm.createObject(Task.class);
+                    realmTask.setName(task);
+
+                    SubTask realmSubTask = realm.createObject(SubTask.class);
+                    realmSubTask.setName(subTask);
+                    realmTask.getSubTasks().add(realmSubTask);
+                }
+            });
+        }
     }
 }
