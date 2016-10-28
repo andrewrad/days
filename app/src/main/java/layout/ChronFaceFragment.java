@@ -27,6 +27,7 @@ import butterknife.ButterKnife;
 import butterknife.OnItemSelected;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import models.SubTask;
 import models.Task;
 
 public class ChronFaceFragment extends Fragment implements View.OnClickListener{
@@ -42,12 +43,16 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
     private boolean isRunning = false;
     private long lastStop;
 
+    private List<String> listOfTasks;
+    private RealmResults<Task> realmArray;
+
     private OnFragmentInteractionListener mListener;
 
     @BindView(R.id.textView3) TextView clock;
     @BindView(R.id.chronometer2) Chronometer chronView;
     @BindView(R.id.startButton) Button startButton;
-    @BindView(R.id.spinner) Spinner dropdown;
+    @BindView(R.id.task_spinner) Spinner taskSpinner;
+    @BindView(R.id.sub_task_spinner) Spinner subTaskSpinner;
 
     public ChronFaceFragment() {
     }
@@ -96,33 +101,39 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
 
     private void addSpinner() {
         realm = Realm.getDefaultInstance();
-        RealmResults<Task> realmArray = realm.where(Task.class).findAllSorted("name");
+        realmArray = realm.where(Task.class).findAllSorted("name");
 
-        List<String> list = new ArrayList<>();
+        listOfTasks = new ArrayList<>();
         for(Task t:realmArray) {
-            if(t.getName().equals("")) {
-                deleteRealmObject(t);
-            } else {
-                list.add(t.getName());
-            }
+            listOfTasks.add(t.getName());
         }
 
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, list);
-        dropdown.setAdapter(dataAdapter);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, listOfTasks);
+        taskSpinner.setAdapter(dataAdapter);
     }
 
     private void deleteRealmObject(final Task t) {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                t.deleteFromRealm();
+                if(t == null) {
+                    realm.where(Task.class).findAll().deleteAllFromRealm();
+                } else {
+                    t.deleteFromRealm();
+                }
             }
         });
     }
 
-    @OnItemSelected(R.id.spinner)
+    @OnItemSelected(R.id.task_spinner)
     public void onSpinnerSelected(int index, AdapterView<?> parent) {
-        Log.e("log", "selected: " + index + ", view: " + parent.getItemAtPosition(index));
+        Task t = realm.where(Task.class).equalTo("name", parent.getItemAtPosition(index).toString()).findFirst();
+        List<String> sub = new ArrayList<>();
+        for (SubTask s : t.getSubTasks()) {
+            sub.add(s.getName());
+        }
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, sub);
+        subTaskSpinner.setAdapter(dataAdapter);
     }
 
     public void onButtonPressed(Uri uri) {
@@ -137,8 +148,7 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
         }
     }
 
@@ -150,9 +160,8 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-
         if(isRunning == false) {
-            Log.e("efe", "time: " + chronView.getBase() + ", " + SystemClock.elapsedRealtime() + ", " + lastStop + " total: " + (SystemClock.elapsedRealtime() - lastStop));
+            Log.e("time", "time: " + chronView.getBase() + ", " + SystemClock.elapsedRealtime() + ", " + lastStop + " total: " + (SystemClock.elapsedRealtime() - lastStop));
             chronView.setBase(SystemClock.elapsedRealtime() - lastStop);
             chronView.start();
             startButton.setText("Stop");
