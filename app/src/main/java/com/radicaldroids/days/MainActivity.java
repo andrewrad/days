@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -24,6 +25,7 @@ import java.util.List;
 import io.realm.Realm;
 import layout.AddTaskFragment;
 import layout.ChronFaceFragment;
+import layout.RemoveTaskFragment;
 import models.SubTask;
 import models.Task;
 
@@ -32,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     List taskList;
     private Realm realm;
     private AddTaskFragment addTaskFragment;
+    private RemoveTaskFragment removeTaskFragment;
+    private ChronFaceFragment chronFaceFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,10 +68,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.replace(R.id.content_main, ChronFaceFragment.newInstance("","")).addToBackStack(null).commit();
+        chronFaceFragment = new ChronFaceFragment();
+        replaceFragment(chronFaceFragment);
+    }
 
+    public void replaceFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_main, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
@@ -109,15 +118,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.add_task) {
-            addTaskFragment = new AddTaskFragment();
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.content_main, addTaskFragment)
-                    .addToBackStack(null)
-                    .commit();
+            replaceFragment(new AddTaskFragment());
 
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.remove_task) {
+            replaceFragment(new RemoveTaskFragment());
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.current_task) {
+            replaceFragment(chronFaceFragment);
 
         } else if (id == R.id.nav_manage) {
 

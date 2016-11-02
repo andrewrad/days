@@ -25,16 +25,17 @@
         android:fontFamily="sans-serif-thin"
         android:textSize="104sp"
         android:layout_marginTop="18dp"
-        android:layout_below="@+id/textView3"
+        android:layout_below="@id/textView3"
         android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="button"
-        android:layout_below="@+id/chronometer2"
+        android:text="Button"
+        android:layout_below="@id/chronometer2"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="23dp"
+        android:textAllCaps="false"
         android:id="@+id/startButton" />
 
     <Spinner
@@ -42,7 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:id="@+id/task_spinner"
-        android:layout_below="@+id/startButton"
+        android:layout_below="@id/startButton"
         android:layout_centerHorizontal="true" />
 
     <Spinner
@@ -50,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:id="@+id/sub_task_spinner"
-        android:layout_below="@+id/task_spinner"
-        android:layout_alignLeft="@+id/task_spinner"
-        android:layout_alignStart="@+id/task_spinner" />
+        android:layout_below="@id/task_spinner"
+        android:layout_alignLeft="@id/task_spinner"
+        android:layout_alignStart="@id/task_spinner" />
 </RelativeLayout>
