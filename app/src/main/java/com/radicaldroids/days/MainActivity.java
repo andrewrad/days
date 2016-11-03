@@ -118,10 +118,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.add_task) {
-            replaceFragment(new AddTaskFragment());
+            addTaskFragment = new AddTaskFragment();
+            replaceFragment(addTaskFragment);
 
         } else if (id == R.id.remove_task) {
-            replaceFragment(new RemoveTaskFragment());
+            removeTaskFragment = new RemoveTaskFragment();
+            replaceFragment(removeTaskFragment);
 
         } else if (id == R.id.current_task) {
             replaceFragment(chronFaceFragment);
@@ -141,17 +143,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onFragmentInteraction(Uri uri) {
-
     }
 
     @Override
     public void createTask(final String task, final String subTask) {
 
         if(!task.equals("")) {
+            Realm.init(this);
+            Realm realm = Realm.getDefaultInstance();
+
             final Task result = realm.where(Task.class).equalTo("name", task).findFirst();
 
             //if task is already in DB
-            if (result != null && result.getName().equals(task)) {
+            if (result != null) {
                 //if subtask is already under task
                 if (realm.where(Task.class).equalTo("subTasks.name", subTask).findFirst() != null) {
                     Toast.makeText(this, "Already contains task and subtask", Toast.LENGTH_SHORT).show();
@@ -160,9 +164,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void execute(Realm realm) {
                             SubTask realmSubTask = realm.createObject(SubTask.class);
-                            realmSubTask.setName(subTask);
-                            result.getSubTasks().add(realmSubTask);
-//                            realm.close();
+                            if(!subTask.isEmpty()) {
+                                realmSubTask.setName(subTask);
+                                result.getSubTasks().add(realmSubTask);
+                            }
+                            realm.close();
 
                             getSupportFragmentManager().popBackStack();
                             getSupportFragmentManager().beginTransaction().remove(addTaskFragment).commit();
@@ -176,11 +182,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Task realmTask = realm.createObject(Task.class);
                         realmTask.setName(task);
 
-                        SubTask realmSubTask = realm.createObject(SubTask.class);
-                        realmSubTask.setName(subTask);
-                        realmTask.getSubTasks().add(realmSubTask);
+                        if(!subTask.isEmpty()) {
+                            SubTask realmSubTask = realm.createObject(SubTask.class);
+                            realmSubTask.setName(subTask);
+                            realmTask.getSubTasks().add(realmSubTask);
+                        }
 
-//                        realm.close();
+                        realm.close();
+                        getSupportFragmentManager().popBackStack();
+                        getSupportFragmentManager().beginTransaction().remove(addTaskFragment).commit();
                     }
                 });
             }

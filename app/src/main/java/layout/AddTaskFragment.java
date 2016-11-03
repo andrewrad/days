@@ -1,7 +1,6 @@
 package layout;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -112,6 +111,5 @@ public class AddTaskFragment extends Fragment implements View.OnClickListener, T
         if(task != null) {
             mListener.createTask(task, subTask);
         }
-        Log.e("tasks", "Tasks: " + tasks);
     }
 }
