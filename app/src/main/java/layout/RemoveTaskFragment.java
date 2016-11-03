@@ -16,6 +16,7 @@ import com.radicaldroids.days.OnFragmentInteractionListener;
 import com.radicaldroids.days.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -36,8 +37,6 @@ public class RemoveTaskFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private Realm realm;
-    private List<String> listOfTasks;
-    private RealmResults<Task> realmArray;
     private ArrayAdapter<String> dataAdapter;
 
     @BindView(R.id.task_spinner) Spinner taskSpinner;
@@ -81,9 +80,9 @@ public class RemoveTaskFragment extends Fragment {
     }
 
     public void populateTaskSpinner() {
-        realmArray = realm.where(Task.class).findAllSorted("name");
+        RealmResults<Task> realmArray = realm.where(Task.class).findAllSorted("name");
 
-        listOfTasks = new ArrayList<>();
+        List<String> listOfTasks = new ArrayList<>();
         for(Task t:realmArray) {
             listOfTasks.add(t.getName());
         }
@@ -93,11 +92,12 @@ public class RemoveTaskFragment extends Fragment {
     }
 
     public void populateSubTaskSpinner(Task t) {
-        List<String> sub = new ArrayList<>();
+        List<String> subList = new ArrayList<>();
         for (SubTask s : t.getSubTasks()) {
-            sub.add(s.getName());
+            subList.add(s.getName());
         }
-        dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, sub);
+        Collections.sort(subList);
+        dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, subList);
         subTaskSpinner.setAdapter(dataAdapter);
     }
 

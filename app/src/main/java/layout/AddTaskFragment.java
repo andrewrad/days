@@ -17,6 +17,8 @@ import android.widget.TextView;
 import com.radicaldroids.days.OnFragmentInteractionListener;
 import com.radicaldroids.days.R;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,7 +111,7 @@ public class AddTaskFragment extends Fragment implements View.OnClickListener, T
         String task = addTask.getText().toString();
         String subTask = addSubTask.getText().toString();
         if(task != null) {
-            mListener.createTask(task, subTask);
+            mListener.createTask(WordUtils.capitalizeFully(task), WordUtils.capitalizeFully(subTask));
         }
     }
 }

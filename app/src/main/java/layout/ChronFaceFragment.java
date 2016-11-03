@@ -20,6 +20,7 @@ import com.radicaldroids.days.OnFragmentInteractionListener;
 import com.radicaldroids.days.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -29,6 +30,8 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import models.SubTask;
 import models.Task;
+
+import static java.util.Comparator.naturalOrder;
 
 public class ChronFaceFragment extends Fragment implements View.OnClickListener{
     private static final String ARG_PARAM1 = "param1";
@@ -42,9 +45,6 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
 
     private boolean isRunning = false;
     private long lastStop;
-
-    private List<String> listOfTasks;
-    private RealmResults<Task> realmArray;
 
     private OnFragmentInteractionListener mListener;
 
@@ -101,9 +101,9 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
 
     private void addSpinner() {
         realm = Realm.getDefaultInstance();
-        realmArray = realm.where(Task.class).findAllSorted("name");
+        RealmResults<Task> realmArray = realm.where(Task.class).findAllSorted("name");
 
-        listOfTasks = new ArrayList<>();
+        List<String> listOfTasks = new ArrayList<>();
         for(Task t:realmArray) {
             listOfTasks.add(t.getName());
         }
@@ -128,11 +128,13 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
     @OnItemSelected(R.id.task_spinner)
     public void onSpinnerSelected(int index, AdapterView<?> parent) {
         Task t = realm.where(Task.class).equalTo("name", parent.getItemAtPosition(index).toString()).findFirst();
-        List<String> sub = new ArrayList<>();
+        List<String> subList = new ArrayList<>();
         for (SubTask s : t.getSubTasks()) {
-            sub.add(s.getName());
+            subList.add(s.getName());
         }
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, sub);
+
+        Collections.sort(subList);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, subList);
         subTaskSpinner.setAdapter(dataAdapter);
     }
 
