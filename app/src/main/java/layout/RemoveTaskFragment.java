@@ -38,9 +38,10 @@ public class RemoveTaskFragment extends Fragment {
     private Realm realm;
     private List<String> listOfTasks;
     private RealmResults<Task> realmArray;
+    private ArrayAdapter<String> dataAdapter;
 
-    @BindView(R.id.task_spinner) Spinner task;
-    @BindView(R.id.sub_task_spinner) Spinner subTask;
+    @BindView(R.id.task_spinner) Spinner taskSpinner;
+    @BindView(R.id.sub_task_spinner) Spinner subTaskSpinner;
 
     public RemoveTaskFragment() {
     }
@@ -69,6 +70,17 @@ public class RemoveTaskFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         realm = Realm.getDefaultInstance();
+        populateTaskSpinner();
+        return view;
+    }
+
+    @OnItemSelected(R.id.task_spinner)
+    public void onSpinnerSelected(int index, AdapterView<?> parent) {
+        Task t = realm.where(Task.class).equalTo("name", parent.getItemAtPosition(index).toString()).findFirst();
+        populateSubTaskSpinner(t);
+    }
+
+    public void populateTaskSpinner() {
         realmArray = realm.where(Task.class).findAllSorted("name");
 
         listOfTasks = new ArrayList<>();
@@ -76,25 +88,45 @@ public class RemoveTaskFragment extends Fragment {
             listOfTasks.add(t.getName());
         }
 
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, listOfTasks);
-        task.setAdapter(dataAdapter);
-        return view;
+        dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, listOfTasks);
+        taskSpinner.setAdapter(dataAdapter);
     }
 
-    @OnItemSelected(R.id.task_spinner)
-    public void onSpinnerSelected(int index, AdapterView<?> parent) {
-        Task t = realm.where(Task.class).equalTo("name", parent.getItemAtPosition(index).toString()).findFirst();
+    public void populateSubTaskSpinner(Task t) {
         List<String> sub = new ArrayList<>();
         for (SubTask s : t.getSubTasks()) {
             sub.add(s.getName());
         }
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, sub);
-        subTask.setAdapter(dataAdapter);
+        dataAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, sub);
+        subTaskSpinner.setAdapter(dataAdapter);
     }
 
     @OnClick(R.id.remove_task_button)
     public void onRemoveTaskClicked(View view) {
-        Log.e("click", "clicked: " + task.getSelectedItem());
+        Log.e("click", "clicked: " + taskSpinner.getSelectedItem() + ", " + subTaskSpinner.getSelectedItem());
+        final Task task = realm.where(Task.class).equalTo("name", this.taskSpinner.getSelectedItem().toString()).findFirst();
+
+        if(task.getSubTasks().size() > 0) {
+            final Task sub = realm.where(Task.class).equalTo("subTasks.name", subTaskSpinner.getSelectedItem().toString()).findFirst();
+
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    sub.getSubTasks().deleteFromRealm(subTaskSpinner.getSelectedItemPosition());
+                }
+            });
+            populateSubTaskSpinner(task);
+            dataAdapter.notifyDataSetChanged();
+
+        } else {
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    task.deleteFromRealm();
+                    populateTaskSpinner();
+                }
+            });
+        }
     }
 
     public void onButtonPressed(Uri uri) {
