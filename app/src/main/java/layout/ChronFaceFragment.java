@@ -90,7 +90,7 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
         ButterKnife.bind(this, view);
         startButton.setText("Start");
 
-        chronTimeView.enterTime(System.currentTimeMillis());
+        chronTimeView.enterTime(0);
 //        ChronTime chronTime = new ChronTime(this.getActivity());
 //        chronTime.setText("hifehiehf");
         Log.e("Text", "chrontimeView text: " + chronTimeView.getText());

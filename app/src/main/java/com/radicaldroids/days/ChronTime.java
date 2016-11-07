@@ -2,8 +2,10 @@ package com.radicaldroids.days;
 
 import android.content.Context;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.RemoteViews.RemoteView;
 import android.widget.TextView;
 
@@ -25,6 +27,9 @@ public class ChronTime extends TextView {
     private StringBuilder mFormatBuilder;
     private StringBuilder mRecycle = new StringBuilder(8);
     private boolean mCountDown;
+    private long lastStopTime;
+    private long startTime;
+    public long totalTime;
 
 //    public ChronTime(Context context) {
 //        super (context);
@@ -43,6 +48,7 @@ public class ChronTime extends TextView {
 
     private void init() {
         mBase = System.currentTimeMillis();
+        mBase = 0;
         updateText(mBase);
     }
 
@@ -51,8 +57,9 @@ public class ChronTime extends TextView {
     }
 
     private synchronized void updateText(long now) {
-        mCountDown = true;
+        mCountDown = false;
         long seconds = mCountDown ? mBase - now : now - mBase;
+        Log.e("time", "mBase: " + mBase + ", now: " + now);
         seconds /= 1000;
         boolean negative = false;
         if (seconds < 0) {
@@ -84,12 +91,16 @@ public class ChronTime extends TextView {
 //        }
         setText(text);
     }
+
     public void start() {
+        startTime = System.currentTimeMillis();
         mStarted = true;
         updateRunning();
     }
 
     public void stop() {
+        lastStopTime = System.currentTimeMillis();
+        totalTime = totalTime + lastStopTime - startTime;
         mStarted = false;
         updateRunning();
     }
@@ -99,7 +110,7 @@ public class ChronTime extends TextView {
         boolean running = mVisible && mStarted;
         if (running != mRunning) {
             if (running) {
-                updateText(SystemClock.elapsedRealtime());
+                updateText(totalTime);
 //                dispatchChronometerTick();
                 postDelayed(mTickRunnable, 1000);
             } else {
@@ -110,11 +121,13 @@ public class ChronTime extends TextView {
     }
 
     private final Runnable mTickRunnable = new Runnable() {
+        int counter;
         @Override
         public void run() {
             if (mRunning) {
-                updateText(SystemClock.elapsedRealtime());
+                updateText(System.currentTimeMillis() - startTime + totalTime);
 //                dispatchChronometerTick();
+                counter++;
                 postDelayed(mTickRunnable, 1000);
             }
         }
