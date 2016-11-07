@@ -16,6 +16,7 @@ import android.widget.Chronometer;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.radicaldroids.days.ChronTime;
 import com.radicaldroids.days.OnFragmentInteractionListener;
 import com.radicaldroids.days.R;
 
@@ -49,6 +50,7 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
     private OnFragmentInteractionListener mListener;
 
     @BindView(R.id.textView3) TextView clock;
+    @BindView(R.id.chron_time) ChronTime chronTimeView;
     @BindView(R.id.chronometer2) Chronometer chronView;
     @BindView(R.id.startButton) Button startButton;
     @BindView(R.id.task_spinner) Spinner taskSpinner;
@@ -87,6 +89,11 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
         View view = inflater.inflate(R.layout.fragment_blank, container, false);
         ButterKnife.bind(this, view);
         startButton.setText("Start");
+
+        chronTimeView.enterTime(System.currentTimeMillis());
+//        ChronTime chronTime = new ChronTime(this.getActivity());
+//        chronTime.setText("hifehiehf");
+        Log.e("Text", "chrontimeView text: " + chronTimeView.getText());
 
         if(savedInstanceState != null) {
             chronView.setBase(savedInstanceState.getLong(TIME_KEY));
@@ -166,10 +173,12 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
             Log.e("time", "time: " + chronView.getBase() + ", " + SystemClock.elapsedRealtime() + ", " + lastStop + " total: " + (SystemClock.elapsedRealtime() - lastStop));
             chronView.setBase(SystemClock.elapsedRealtime() - lastStop);
             chronView.start();
+            chronTimeView.start();
             startButton.setText("Stop");
             isRunning = true;
         } else {
             chronView.stop();
+            chronTimeView.stop();
             lastStop = SystemClock.elapsedRealtime() - chronView.getBase();
             startButton.setText("Start");
             isRunning = false;
