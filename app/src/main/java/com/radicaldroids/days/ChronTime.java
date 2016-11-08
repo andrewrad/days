@@ -1,13 +1,12 @@
 package com.radicaldroids.days;
 
 import android.content.Context;
-import android.os.SystemClock;
-import android.provider.Settings;
-import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.widget.RemoteViews.RemoteView;
 import android.widget.TextView;
+
+import java.util.Formatter;
+import java.util.Locale;
 
 
 /**
@@ -17,19 +16,12 @@ import android.widget.TextView;
 public class ChronTime extends TextView {
 
     private long mBase;
-    private long mNow; // the currently displayed time
-    private boolean mVisible;
     private boolean mStarted;
     private boolean mRunning;
-    private boolean mLogged;
-    private String mFormat;
-    private Object[] mFormatterArgs = new Object[1];
-    private StringBuilder mFormatBuilder;
     private StringBuilder mRecycle = new StringBuilder(8);
-    private boolean mCountDown;
-    private long lastStopTime;
     private long startTime;
     public long totalTime;
+    public Context context;
 
 //    public ChronTime(Context context) {
 //        super (context);
@@ -38,6 +30,8 @@ public class ChronTime extends TextView {
 
     public ChronTime(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
+
         init();
     }
 
@@ -57,39 +51,56 @@ public class ChronTime extends TextView {
     }
 
     private synchronized void updateText(long now) {
-        mCountDown = false;
-        long seconds = mCountDown ? mBase - now : now - mBase;
+        boolean mCountDown = false;  //TODO: build countDown method
+        long millisecs = mCountDown ? mBase - now : now - mBase;
         Log.e("time", "mBase: " + mBase + ", now: " + now);
-        seconds /= 1000;
         boolean negative = false;
-        if (seconds < 0) {
-            seconds = -seconds;
+        if (millisecs < 0) {
+            millisecs = -millisecs;
             negative = true;
         }
-        String text = DateUtils.formatElapsedTime(mRecycle, seconds);
+//        String text = DateUtils.formatElapsedTime(mRecycle, seconds);
+        String text = formatElapsedTime(mRecycle, millisecs);
         if (negative) {
 //            text = getResources().getString(R.string.negative_duration, text);
         }
 
-//        if (mFormat != null) {
-//            Locale loc = Locale.getDefault();
-//            if (mFormatter == null || !loc.equals(mFormatterLocale)) {
-//                mFormatterLocale = loc;
-//                mFormatter = new Formatter(mFormatBuilder, loc);
-//            }
-//            mFormatBuilder.setLength(0);
-//            mFormatterArgs[0] = text;
-//            try {
-//                mFormatter.format(mFormat, mFormatterArgs);
-//                text = mFormatBuilder.toString();
-//            } catch (IllegalFormatException ex) {
-//                if (!mLogged) {
-//                    Log.w(TAG, "Illegal format string: " + mFormat);
-//                    mLogged = true;
-//                }
-//            }
-//        }
         setText(text);
+    }
+
+    public String formatElapsedTime(StringBuilder recycle, long elapsedMilliseconds) {
+        long hours = 0;
+        long minutes = 0;
+        long seconds = 0;
+        long milliSecs = 0;
+        if (elapsedMilliseconds >= 3600000) {
+            hours = elapsedMilliseconds / 3600000;
+            elapsedMilliseconds -= hours * 3600000;
+        }
+        if (elapsedMilliseconds >= 60000) {
+            minutes = elapsedMilliseconds / 60000;
+            elapsedMilliseconds -= minutes * 60000;
+        }
+        if (elapsedMilliseconds >= 1000) {
+            seconds = elapsedMilliseconds / 1000;
+            elapsedMilliseconds -= seconds * 1000;
+        }
+
+        milliSecs = elapsedMilliseconds/100;
+
+        StringBuilder sb = recycle;
+        if (sb == null) {
+            sb = new StringBuilder(8);
+        } else {
+            sb.setLength(0);
+        }
+
+        Formatter f = new Formatter(sb, Locale.getDefault());
+        if (hours > 0) {
+            return f.format(context.getResources().getString(R.string.elapsed_time_short_format_h_mm_ss), hours, minutes, seconds).toString();
+        } else {
+            return f.format(context.getResources().getString(R.string.elapsed_time_short_format_mm_ss_ms), minutes, seconds, milliSecs).toString();
+        }
     }
 
     public void start() {
@@ -99,20 +110,20 @@ public class ChronTime extends TextView {
     }
 
     public void stop() {
-        lastStopTime = System.currentTimeMillis();
+        long lastStopTime = System.currentTimeMillis();
         totalTime = totalTime + lastStopTime - startTime;
         mStarted = false;
         updateRunning();
     }
 
     private void updateRunning() {
-        mVisible = true;
+        boolean mVisible = true;
         boolean running = mVisible && mStarted;
         if (running != mRunning) {
             if (running) {
                 updateText(totalTime);
 //                dispatchChronometerTick();
-                postDelayed(mTickRunnable, 1000);
+                postDelayed(mTickRunnable, 100);
             } else {
                 removeCallbacks(mTickRunnable);
             }
@@ -128,7 +139,7 @@ public class ChronTime extends TextView {
                 updateText(System.currentTimeMillis() - startTime + totalTime);
 //                dispatchChronometerTick();
                 counter++;
-                postDelayed(mTickRunnable, 1000);
+                postDelayed(mTickRunnable, 100);
             }
         }
     };

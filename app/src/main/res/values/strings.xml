@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Days</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -8,4 +8,8 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="elapsed_time_short_format_mm_ss_ms"><xliff:g id="minutes" example="1">%1$02d</xliff:g>:<xliff:g id="seconds" example="43">%2$02d</xliff:g>.<xliff:g id="millisecs" example="33">%3$d</xliff:g></string>
+    <string name="elapsed_time_short_format_h_mm_ss"><xliff:g id="hours" example="1">%1$02d</xliff:g>:<xliff:g id="minutes" example="43">%2$02d</xliff:g>:<xliff:g id="seconds" example="33">%3$d</xliff:g></string>
+
 </resources>
