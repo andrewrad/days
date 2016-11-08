@@ -1,7 +1,5 @@
 package models;
 
-import java.util.List;
-
 import io.realm.RealmList;
 import io.realm.RealmObject;
 
@@ -12,6 +10,7 @@ import io.realm.RealmObject;
 public class Task extends RealmObject{
     private String name;
     private RealmList<SubTask> subTasks;
+    private RealmList<EpochSSTimes> epochSSTimes;
 
     public String getName() {
         return name;
@@ -27,5 +26,13 @@ public class Task extends RealmObject{
 
     public void setSubTasks(RealmList<SubTask> subTasks) {
         this.subTasks = subTasks;
+    }
+
+    public RealmList<EpochSSTimes> getEpochSSTimes() {
+        return epochSSTimes;
+    }
+
+    public void setEpochSSTimes(RealmList<EpochSSTimes> epochSSTimes) {
+        this.epochSSTimes = epochSSTimes;
     }
 }

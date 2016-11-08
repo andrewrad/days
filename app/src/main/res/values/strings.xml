@@ -11,5 +11,7 @@
 
     <string name="elapsed_time_short_format_mm_ss_ms"><xliff:g id="minutes" example="1">%1$02d</xliff:g>:<xliff:g id="seconds" example="43">%2$02d</xliff:g>.<xliff:g id="millisecs" example="33">%3$d</xliff:g></string>
     <string name="elapsed_time_short_format_h_mm_ss"><xliff:g id="hours" example="1">%1$02d</xliff:g>:<xliff:g id="minutes" example="43">%2$02d</xliff:g>:<xliff:g id="seconds" example="33">%3$d</xliff:g></string>
+    <string name="start_button_text">Start</string>
+    <string name="stop_button_text">Stop</string>
 
 </resources>

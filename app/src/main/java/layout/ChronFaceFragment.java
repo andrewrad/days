@@ -3,7 +3,6 @@ package layout;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Chronometer;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -28,11 +26,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnItemSelected;
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
+import models.EpochSSTimes;
 import models.SubTask;
 import models.Task;
-
-import static java.util.Comparator.naturalOrder;
 
 public class ChronFaceFragment extends Fragment implements View.OnClickListener{
     private static final String ARG_PARAM1 = "param1";
@@ -43,6 +41,7 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
 
     private boolean isRunning = false;
     private long lastStop;
+    private long start;
 
     private OnFragmentInteractionListener mListener;
 
@@ -84,9 +83,9 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_blank, container, false);
         ButterKnife.bind(this, view);
-        startButton.setText("Start");
+        startButton.setText(R.string.start_button_text);
 
-        chronTimeView.enterTime(0);
+//        chronTimeView.enterTime(0);
 
         if(savedInstanceState != null) {
             chronTimeView.setTotalTime(savedInstanceState.getLong(TIME_KEY));
@@ -160,16 +159,45 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
         mListener = null;
     }
 
+    /**
+     * onClick() starts and stops the clock
+     * when stopped, it will create a Realm entry for start/stop times
+     * @param view
+     */
     @Override
-    public void onClick(View v) {
+    public void onClick(View view) {
         if(!isRunning) {
-            chronTimeView.start();
-            startButton.setText("Stop");
+            start = chronTimeView.start();
+            startButton.setText(R.string.stop_button_text);
             isRunning = true;
         } else {
-            chronTimeView.stop();
-            startButton.setText("Start");
+            final long stop = chronTimeView.stop();
+            Realm.init(this.getActivity());
+            Realm realm = Realm.getDefaultInstance();
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    EpochSSTimes epochSSTimes = realm.createObject(EpochSSTimes.class);
+                    epochSSTimes.setStartTime(start);
+                    epochSSTimes.setEndTime(stop);
+                    String selectedName = taskSpinner.getSelectedItem().toString();
+                    Task t = realm.where(Task.class).equalTo("name", selectedName).findFirst();
+                    t.getEpochSSTimes().add(epochSSTimes);
+
+                    readEpochSSTimes(selectedName);
+                }
+            });
+
+            startButton.setText(R.string.start_button_text);
             isRunning = false;
+        }
+    }
+
+    private void readEpochSSTimes(String selectedName) {
+        Task t = realm.where(Task.class).equalTo("name", selectedName).findFirst();
+        RealmList<EpochSSTimes> realmList = t.getEpochSSTimes();
+        for(EpochSSTimes r:realmList) {
+            Log.e("times", "start: " + r.getStartTime() + ", end: " + r.getEndTime());
         }
     }
 

@@ -101,17 +101,19 @@ public class ChronTime extends TextView {
         }
     }
 
-    public void start() {
+    public long start() {
         startTime = System.currentTimeMillis();
         mStarted = true;
         updateRunning();
+        return startTime;
     }
 
-    public void stop() {
+    public long stop() {
         long lastStopTime = System.currentTimeMillis();
         totalTime = totalTime + lastStopTime - startTime;
         mStarted = false;
         updateRunning();
+        return lastStopTime;
     }
 
     public long getTotalTime() {
