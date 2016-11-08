@@ -20,8 +20,8 @@ public class ChronTime extends TextView {
     private boolean mRunning;
     private StringBuilder mRecycle = new StringBuilder(8);
     private long startTime;
-    public long totalTime;
-    public Context context;
+    private long totalTime;
+    private Context context;
 
 //    public ChronTime(Context context) {
 //        super (context);
@@ -53,13 +53,11 @@ public class ChronTime extends TextView {
     private synchronized void updateText(long now) {
         boolean mCountDown = false;  //TODO: build countDown method
         long millisecs = mCountDown ? mBase - now : now - mBase;
-        Log.e("time", "mBase: " + mBase + ", now: " + now);
         boolean negative = false;
         if (millisecs < 0) {
             millisecs = -millisecs;
             negative = true;
         }
-//        String text = DateUtils.formatElapsedTime(mRecycle, seconds);
         String text = formatElapsedTime(mRecycle, millisecs);
         if (negative) {
 //            text = getResources().getString(R.string.negative_duration, text);
@@ -114,6 +112,14 @@ public class ChronTime extends TextView {
         totalTime = totalTime + lastStopTime - startTime;
         mStarted = false;
         updateRunning();
+    }
+
+    public long getTotalTime() {
+        return totalTime;
+    }
+
+    public void setTotalTime(long totalTime) {
+        this.totalTime = totalTime;
     }
 
     private void updateRunning() {

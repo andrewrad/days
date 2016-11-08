@@ -39,9 +39,6 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
     private static final String ARG_PARAM2 = "param2";
     private static final String TIME_KEY = "time";
 
-    private String mParam1;
-    private String mParam2;
-
     private Realm realm;
 
     private boolean isRunning = false;
@@ -51,7 +48,6 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
 
     @BindView(R.id.textView3) TextView clock;
     @BindView(R.id.chron_time) ChronTime chronTimeView;
-    @BindView(R.id.chronometer2) Chronometer chronView;
     @BindView(R.id.startButton) Button startButton;
     @BindView(R.id.task_spinner) Spinner taskSpinner;
     @BindView(R.id.sub_task_spinner) Spinner subTaskSpinner;
@@ -79,8 +75,8 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            String mParam1 = getArguments().getString(ARG_PARAM1);
+            String mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -91,14 +87,11 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
         startButton.setText("Start");
 
         chronTimeView.enterTime(0);
-//        ChronTime chronTime = new ChronTime(this.getActivity());
-//        chronTime.setText("hifehiehf");
-        Log.e("Text", "chrontimeView text: " + chronTimeView.getText());
 
         if(savedInstanceState != null) {
-            chronView.setBase(savedInstanceState.getLong(TIME_KEY));
+            chronTimeView.setTotalTime(savedInstanceState.getLong(TIME_KEY));
         } else {
-            chronView.setBase(SystemClock.elapsedRealtime());
+            chronTimeView.setTotalTime(0);
         }
         startButton.setOnClickListener(this);
         addSpinner();
@@ -169,17 +162,12 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-        if(isRunning == false) {
-            Log.e("time", "time: " + chronView.getBase() + ", " + SystemClock.elapsedRealtime() + ", " + lastStop + " total: " + (SystemClock.elapsedRealtime() - lastStop));
-            chronView.setBase(SystemClock.elapsedRealtime() - lastStop);
-            chronView.start();
+        if(!isRunning) {
             chronTimeView.start();
             startButton.setText("Stop");
             isRunning = true;
         } else {
-            chronView.stop();
             chronTimeView.stop();
-            lastStop = SystemClock.elapsedRealtime() - chronView.getBase();
             startButton.setText("Start");
             isRunning = false;
         }
@@ -187,7 +175,7 @@ public class ChronFaceFragment extends Fragment implements View.OnClickListener{
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putLong(TIME_KEY, chronView.getBase());
+        outState.putLong(TIME_KEY, chronTimeView.getTotalTime());
         super.onSaveInstanceState(outState);
     }
 }

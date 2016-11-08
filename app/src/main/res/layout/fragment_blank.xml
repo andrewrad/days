@@ -21,13 +21,7 @@
     <com.radicaldroids.days.ChronTime
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="56sp"
-        android:id="@+id/chron_time"/>
-
-    <Chronometer
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/chronometer2"
+        android:id="@+id/chron_time"
         android:fontFamily="sans-serif-thin"
         android:textSize="104sp"
         android:layout_marginTop="18dp"
@@ -38,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Button"
-        android:layout_below="@id/chronometer2"
+        android:layout_below="@id/chron_time"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="23dp"
         android:textAllCaps="false"
